@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 from torch.utils.data import DataLoader
 from src.data_process import ImgDataset, DataPreProcess
-from src.net import Net_Classifier
+from src.net import Net_Classifier, Net_Classifier_cyc
 from src.training_model import HW3_Model
 
 
@@ -63,11 +63,10 @@ if __name__ == "__main__":
 
     # training
     device = get_device()
-    net = Net_Classifier(img_inChannel).to(device)
+    net = Net_Classifier_cyc(img_inChannel).to(device)
     loss = nn.CrossEntropyLoss()  # 因為是 classification task，所以 loss 使用 CrossEntropyLoss
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-4)
-    EPOCH = 30
 
     model = HW3_Model(device, net, loss, optimizer)
-    model.training(train_loader, val_loader, NUM_EPOCH=30,
-                   saveDir='./out', checkpoint=2)
+    model.training(train_loader, val_loader, NUM_EPOCH=50,
+                   saveDir='./out', checkpoint=10)

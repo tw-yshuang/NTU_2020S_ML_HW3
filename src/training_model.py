@@ -1,6 +1,11 @@
 from torch.autograd.grad_mode import no_grad
+import os
 import time
 import torch
+try:
+    from src.Model.find_file_name import get_filenames
+except ModuleNotFoundError:
+    from Model.find_file_name import get_filenames
 
 
 class HW3_Model(object):
@@ -21,7 +26,11 @@ class HW3_Model(object):
             'val_loss': []
         }
 
-    def training(self, loader, val_loader=None, NUM_EPOCH=1, printPerformance=True, saveDir=None, checkpoint=10):
+    def training(self, loader, val_loader=None, NUM_EPOCH=1, printPerformance=True, saveDir=None, checkpoint=10, bestModelSave=False):
+        if saveDir is not None:
+            self.saveDir = saveDir
+            self.checkpoint = checkpoint
+
         for epoch in range(1, NUM_EPOCH+1):
             time_start = time.time()
             train_acc = 0.
@@ -48,35 +57,49 @@ class HW3_Model(object):
             self.performance_history['train_acc'].append(self.train_acc)
             self.performance_history['train_loss'].append(self.train_loss)
 
+            # valiation test
             if val_loader is not None:
                 self.valiating(val_loader)
-                if printPerformance:
-                    print('[{:>2d}/{}] {:.3f} sec, Train acc: {:.5f}, loss: {:.5f} | Val acc: {:.5f}, loss: {:.5f}'.format(
+                if printPerformance:  # print valiation performance
+                    print('[{:>2d}/{}] {:.3f} sec, Train acc: {:.7f}, loss: {:.7f} | Val acc: {:.7f}, loss: {:.7f}'.format(
                         epoch, NUM_EPOCH, time.time()-time_start,
                         self.train_acc, self.train_loss, self.val_acc, self.val_loss))
+            elif printPerformance:  # print train performance
+                print('[{:>2d}/{}] {:.3f}sec, Train acc: {:.7f}, loss: {:.7f}'.format(
+                    epoch, NUM_EPOCH, time.time()-time_start,
+                    self.train_acc, self.train_loss))
 
-            else:
-                if printPerformance:
-                    print('[{:>2d}/{}] {:.3f}sec, Train acc: {:.5f}, loss: {:.5f}'.format(
-                        epoch, NUM_EPOCH, time.time()-time_start,
-                        self.train_acc, self.train_loss))
+            # only valiating is work, self.best_model_epoch has meaning
+            if val_loader is not None:
+                if epoch == 1:
+                    self.best_model_epoch = 1
 
-            if saveDir is not None:
-                self.saveDir = saveDir
-                self.checkpoint = checkpoint
-                if epoch % self.checkpoint == 0:
-                    path = ''
-                    # path name rule is: mmdd-hhmm_epoch_loss-value, e.g. 0814-1600_e010_0.00138.pkl
-                    if val_loader is not None:
-                        # loss-value = val_loss
-                        path = '{}/{}_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
+                if self.performance_history['val_loss'][self.best_model_epoch-1] >= self.val_loss:
+                    # save the best model
+                    if saveDir is not None and bestModelSave is True:
+                        filenames = get_filenames(
+                            self.saveDir, '*best_e{:03d}*.pkl'.format(self.best_model_epoch))
+                        os.remove([filename for filename in filenames])
+                        self.best_model_epoch = epoch
+                        path = '{}/{}_best_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
                             '%m%d-%H%M'), epoch, str(self.val_loss)[:6])
+                        self.save_model(path, onlyParameters=True)
                     else:
-                        # loss-value = train_loss
-                        path = '{}/{}_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
-                            '%m%d-%H%M'), epoch, str(self.train_loss)[:6])
+                        self.best_model_epoch = epoch
 
-                    self.save_model(path, onlyParameters=True)
+            # checkpoint save model
+            if epoch % self.checkpoint == 0:
+                path = ''
+                # path name rule is: mmdd-hhmm_epoch_loss-value, e.g. 0814-1600_e010_0.00138.pkl
+                if val_loader is not None:
+                    # loss-value = val_loss
+                    path = '{}/{}_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
+                        '%m%d-%H%M'), epoch, str(self.val_loss)[:6])
+                else:
+                    # loss-value = train_loss
+                    path = '{}/{}_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
+                        '%m%d-%H%M'), epoch, str(self.train_loss)[:6])
+                self.save_model(path, onlyParameters=True)
 
     def valiating(self, loader):
         self.net.eval()  # change model to the evaluation(val or test) mode.

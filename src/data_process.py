@@ -3,8 +3,11 @@ import torch
 import cv2
 import pickle
 import numpy as np
-from src.Model.find_file_name import get_filenames
 from torch.utils.data import Dataset
+try:
+    from src.Model.find_file_name import get_filenames
+except ModuleNotFoundError:
+    from Model.find_file_name import get_filenames
 
 
 class DataPreProcess(object):
@@ -12,7 +15,7 @@ class DataPreProcess(object):
         self.imgChannel = imgChannel
         self.path = path
         self.savePath = savePath
-        self.filenames = get_filenames(self.path, 'jpg')
+        self.filenames = get_filenames(self.path, '.jpg')
 
         if imgShape is not tuple:
             imgShape = (imgShape, imgShape)
