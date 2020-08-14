@@ -4,9 +4,9 @@ import torch
 import pickle
 import numpy as np
 from torch.utils.data import DataLoader
-from data_process import ImgDataset, DataPreProcess
-from net import Net_Classifier
-from training_model import HW3_Model
+from src.data_process import ImgDataset, DataPreProcess
+from src.net import Net_Classifier
+from src.training_model import HW3_Model
 
 
 def get_device():

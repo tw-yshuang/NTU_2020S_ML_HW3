@@ -1,10 +1,9 @@
 # import torchvision.transforms as transforms
-from main import img_inChannel
 import torch
 import cv2
 import pickle
 import numpy as np
-from Model.find_file_name import get_filenames
+from src.Model.find_file_name import get_filenames
 from torch.utils.data import Dataset
 
 
