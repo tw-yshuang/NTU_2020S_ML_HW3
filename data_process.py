@@ -1,4 +1,5 @@
 # import torchvision.transforms as transforms
+from main import img_inChannel
 import torch
 import cv2
 import pickle
@@ -78,3 +79,13 @@ class ImgDataset(Dataset):
             y_array[i][y] = 1
 
         return y_array
+
+
+if __name__ == "__main__":
+    img_inChannel = 3
+    train = DataPreProcess('Data/food-11/training', 128,
+                           img_inChannel, savePath='Data/train.pickle')
+    val = DataPreProcess('Data/food-11/validation', 128,
+                         img_inChannel, savePath='Data/val.pickle')
+    test = DataPreProcess('Data/food-11/testing', 128,
+                          img_inChannel, isTest=True,  savePath='Data/test.pickle')
