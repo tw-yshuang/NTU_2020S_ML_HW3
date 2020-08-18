@@ -4,8 +4,10 @@ import time
 import torch
 try:
     from src.Model.find_file_name import get_filenames
+    from src.Model.Model_Perform_Tool import draw_plot
 except ModuleNotFoundError:
     from Model.find_file_name import get_filenames
+    from Model.Model_Perform_Tool import draw_plot
 
 
 class HW3_Model(object):
@@ -26,9 +28,15 @@ class HW3_Model(object):
             'val_loss': []
         }
 
-    def training(self, loader, val_loader=None, NUM_EPOCH=1, printPerformance=True, saveDir=None, checkpoint=10, bestModelSave=False):
+    def training(self, loader, val_loader=None, NUM_EPOCH=1, printPerformance=True, saveDir=None, checkpoint=0, bestModelSave=False):
         if saveDir is not None:
-            self.saveDir = saveDir
+            self.saveDir = '{}/{}'.format(saveDir, time.strftime('%m%d-%H%M'))
+            try:
+                os.mkdir(self.saveDir)
+            except OSError:
+                print("Fail to create the directory {} !".format(self.saveDir))
+            else:
+                print("Successfully created the directory: {}".format(self.saveDir))
             self.checkpoint = checkpoint
 
         for epoch in range(1, NUM_EPOCH+1):
@@ -69,7 +77,7 @@ class HW3_Model(object):
                     epoch, NUM_EPOCH, time.time()-time_start,
                     self.train_acc, self.train_loss))
 
-            # only valiating is work, self.best_model_epoch has meaning
+            # only valiating is work, self.best_model_epoch and bestModelSave has meaning
             if val_loader is not None:
                 if epoch == 1:
                     self.best_model_epoch = 1
@@ -78,11 +86,11 @@ class HW3_Model(object):
                     # save the best model
                     if saveDir is not None and bestModelSave is True:
                         filenames = get_filenames(
-                            self.saveDir, '*best_e{:03d}*.pkl'.format(self.best_model_epoch))
-                        os.remove([filename for filename in filenames])
+                            self.saveDir, 'best_e{:03d}*.pickle'.format(self.best_model_epoch))
+                        [os.remove(filename) for filename in filenames]
                         self.best_model_epoch = epoch
-                        path = '{}/{}_best_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
-                            '%m%d-%H%M'), epoch, str(self.val_loss)[:6])
+                        path = '{}/best_e{:03d}_{}.pickle'.format(
+                            self.saveDir, epoch, str(self.val_loss)[:6])
                         self.save_model(path, onlyParameters=True)
                     else:
                         self.best_model_epoch = epoch
@@ -90,15 +98,15 @@ class HW3_Model(object):
             # checkpoint save model
             if epoch % self.checkpoint == 0:
                 path = ''
-                # path name rule is: mmdd-hhmm_epoch_loss-value, e.g. 0814-1600_e010_0.00138.pkl
+                # path name rule is: mmdd-hhmm_epoch_loss-value, e.g. 0814-1600_e010_0.00138.pickle
                 if val_loader is not None:
                     # loss-value = val_loss
-                    path = '{}/{}_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
-                        '%m%d-%H%M'), epoch, str(self.val_loss)[:6])
+                    path = '{}/e{:03d}_{}.pickle'.format(
+                        self.saveDir, epoch, str(self.val_loss)[:6])
                 else:
                     # loss-value = train_loss
-                    path = '{}/{}_e{:03d}_{}.pkl'.format(self.saveDir, time.strftime(
-                        '%m%d-%H%M'), epoch, str(self.train_loss)[:6])
+                    path = '{}/e{:03d}_{}.pickle'.format(
+                        self.saveDir, epoch, str(self.train_loss)[:6])
                 self.save_model(path, onlyParameters=True)
 
     def valiating(self, loader):
@@ -139,6 +147,20 @@ class HW3_Model(object):
 
     def save_model(self, path, onlyParameters=True):
         if onlyParameters:
-            torch.save(self.net.state_dict(), path)
+            # torch.save(self.net.state_dict(), path)
+            net = self.net
+            self.net = self.net.state_dict()
+            # with open(path, 'wb') as target:
+            #     pickle.dump(self, target)
+            # self.net = net
+            torch.save(self, path)
+            self.net = net
+
         else:
-            torch.save(self.net, path)
+            # with open(path, 'wb') as target:
+            #     pickle.dump(self, path)
+            torch.save(self, path)
+
+    def get_performance_plt(self):
+        draw_plot(self.performance_history['train_acc'], self.performance_history['train_loss'],
+                  self.performance_history['val_acc'], self.performance_history['val_loss'], self.saveDir)
