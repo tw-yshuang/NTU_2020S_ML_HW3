@@ -15,7 +15,7 @@ class DataPreProcess(object):
         self.imgChannel = imgChannel
         self.path = path
         self.savePath = savePath
-        self.filenames = get_filenames(self.path, '.jpg')
+        self.filenames = sorted(get_filenames(self.path, '.jpg'))
 
         if imgShape is not tuple:
             imgShape = (imgShape, imgShape)
@@ -54,7 +54,8 @@ class DataPreProcess(object):
 class ImgDataset(Dataset):
     def __init__(self, x, y=None, transforms=None):
         self.x = x
-        if y is not None:
+        self.y = y
+        if self.y is not None:
             # self.y = y
             # y = self.one_hot_encode()
             self.y = torch.LongTensor(y)

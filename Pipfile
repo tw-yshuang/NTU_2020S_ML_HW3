@@ -15,6 +15,7 @@ pycodestyle = "==2.6.0"
 toml = "==0.10.1"
 Pillow = "==7.2.0"
 matplotlib = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.6"

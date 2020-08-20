@@ -1,9 +1,9 @@
-from torch import exp
+from torch import dtype, int8
 from torch.autograd.grad_mode import no_grad
 import os
+import numpy as np
 import time
 import torch
-from torch.optim import optimizer
 try:
     from src.Model.find_file_name import get_filenames
     from src.Model.Model_Perform_Tool import draw_plot
@@ -155,7 +155,10 @@ class HW3_Model(object):
 
                 pred = self.net(data).cpu()
                 pred_label = torch.argmax(pred, dim=1).numpy()
-                prediction.append(pred_label)
+
+                prediction = np.concatenate(
+                    (prediction, pred_label), axis=0).astype('int8')
+                # prediction.append(pred_label)
 
             return prediction
 
