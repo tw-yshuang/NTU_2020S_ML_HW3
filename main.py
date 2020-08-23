@@ -21,14 +21,14 @@ def read_pickle(path):
         return pickle.load(target)
 
 
-def training_analysis(valiadating=True):
+def training_analysis(NUM_EPOCH, valiadating=True):
     # training use agumentation
     train_transforms_arg = transforms.Compose([
         transforms.ColorJitter(brightness=(
-            0, 50), contrast=(0, 25)),  # , saturation=(0, 10), hue=(-0.25, 0.25)
+            0, 50), contrast=(0, 25), saturation=(0, 10), hue=(-0.25, 0.25)),  # , saturation=(0, 10), hue=(-0.25, 0.25)
         # degree of rotat e.g. 15=(-15, 15)
         transforms.RandomRotation(50, expand=False),
-        transforms.Resize((128, 128)),
+        # transforms.Resize((128, 128)),
     ])
     train_transforms = transforms.Compose([
         transforms.ToPILImage(),
@@ -44,8 +44,8 @@ def training_analysis(valiadating=True):
     ])
 
     # upload to DataLoader
-    BATCH_SIZE = 128
-    NUM_WORKERS = 3  # depand on transforms step
+    BATCH_SIZE = 64  # 　<<<<<　Batch size >>>>>
+    NUM_WORKERS = 4  # depand on transforms step
 
     # training
     loss = nn.CrossEntropyLoss()  # 因為是 classification task，所以 loss 使用 CrossEntropyLoss
@@ -54,13 +54,14 @@ def training_analysis(valiadating=True):
     model = HW3_Model(device, net, loss, optimizer)
 
     if valiadating:
-        train_set = ImgDataset(train.x, train.y, train_transforms)
+        train_set = ImgDataset(
+            train.x, train.y, train_transforms)  # 　<<<<<　train_transforms >>>>>
         val_set = ImgDataset(val.x, val.y, test_transforms)
         train_loader = DataLoader(train_set, BATCH_SIZE,
                                   shuffle=True, num_workers=NUM_WORKERS)
         val_loader = DataLoader(val_set, BATCH_SIZE,
                                 shuffle=True, num_workers=NUM_WORKERS)
-        model.training(train_loader, val_loader, NUM_EPOCH=200,
+        model.training(train_loader, val_loader, NUM_EPOCH=NUM_EPOCH,
                        saveDir='./out', checkpoint=20, bestModelSave=True)
         model.get_performance_plt()
     else:
@@ -68,24 +69,24 @@ def training_analysis(valiadating=True):
             (train.x, val.x)), np.concatenate((train.y, val.y)), train_transforms)
         train_loader = DataLoader(train_set, BATCH_SIZE,
                                   shuffle=True, num_workers=NUM_WORKERS)
-        model.training(train_loader, NUM_EPOCH=200,
+        model.training(train_loader, NUM_EPOCH=NUM_EPOCH,
                        saveDir='./out', checkpoint=20, bestModelSave=True)
 
 
-def pre_training(path):
+def pre_training(path, NUM_EPOCH):
     # training use agumentation
     train_transforms_arg = transforms.Compose([
         transforms.ColorJitter(brightness=(
-            0, 50), contrast=(0, 25), saturation=(0, 10)),  # hue=(-0.25, 0.25)
+            0, 50), contrast=(0, 25), saturation=(0, 10), hue=(-0.25, 0.25)),  # , saturation=(0, 10), hue=(-0.25, 0.25)
         # degree of rotat e.g. 15=(-15, 15)
         transforms.RandomRotation(50, expand=False),
-        transforms.Resize((128, 128)),
+        # transforms.Resize((128, 128)),
     ])
     train_transforms = transforms.Compose([
         transforms.ToPILImage(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
-        transforms.RandomApply([train_transforms_arg], p=0.9),
+        transforms.RandomApply([train_transforms_arg], p=0.95),
         transforms.ToTensor(),  # data normalization
     ])
     # testing dosen't use agumentation
@@ -94,11 +95,12 @@ def pre_training(path):
         transforms.ToTensor(),  # data normalization
     ])
 
+    # 　<<<<< train_transforms >>>>>
     train_set = ImgDataset(train.x, train.y, train_transforms)
     val_set = ImgDataset(val.x, val.y, test_transforms)
 
     # upload to DataLoader
-    BATCH_SIZE = 128
+    BATCH_SIZE = 64  # 　<<<<< Batch size >>>>>
     NUM_WORKERS = 3  # depand on transforms step
     train_loader = DataLoader(train_set, BATCH_SIZE,
                               shuffle=True, num_workers=NUM_WORKERS)
@@ -112,7 +114,7 @@ def pre_training(path):
 
     model = HW3_Model(device, net, loss, optimizer)
     model.load_model(path)
-    model.training(train_loader, val_loader, NUM_EPOCH=50,
+    model.training(train_loader, val_loader, NUM_EPOCH=NUM_EPOCH, saveDir=model.saveDir,
                    checkpoint=50, bestModelSave=True)
     model.get_performance_plt()
 
@@ -162,7 +164,7 @@ if __name__ == "__main__":
     # net is use ntutiem_cyc server
     net = Net_Classifier_cyc(img_inChannel).to(device)
 
-    training_analysis(valiadating=True)
-    # pre_training('out/0819-1355/best_e010_0.0125.pickle')
+    # training_analysis(200, valiadating=True)
+    pre_training('out/0823-0006/final_e200_0.0137.pickle', 100)
     # best_training()
     # test_predict('out/0820-1444/final_e200_0.0080.pickle')
