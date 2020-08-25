@@ -121,7 +121,11 @@ class HW3_Model(object):
                     LOSS_VALUE = self.train_loss
                 path = '{}/{}e{:03d}_{}.pickle'.format(
                     self.saveDir, mark_word, epoch, str(LOSS_VALUE)[:6])
-                self.save_model(path, onlyParameters=True)
+
+                if mark_word == 'final_':
+                    self.save_model(path, onlyParameters=False)
+                else:
+                    self.save_model(path, onlyParameters=True)
 
     def valiating(self, loader):
         self.net.eval()  # change model to the evaluation(val or test) mode.
@@ -175,7 +179,6 @@ class HW3_Model(object):
             torch.save(self, path)
             self.net = net
             self.optimizer = optimizer
-
         else:
             # with open(path, 'wb') as target:
             #     pickle.dump(self, path)
