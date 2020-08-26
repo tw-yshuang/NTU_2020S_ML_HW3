@@ -1,4 +1,3 @@
-from torch import dtype, int8
 from torch.autograd.grad_mode import no_grad
 import os
 import numpy as np
@@ -19,10 +18,6 @@ class HW3_Model(object):
         self.loss_func = loss_func
         self.optimizer = optimizer
 
-        # self.train_acc_list = []
-        # self.train_loss_list = []
-        # self.val_acc_list = []
-        # self.val_loss_list = []
         self.performance_history = {
             'train_acc': [],
             'train_loss': [],
@@ -71,11 +66,6 @@ class HW3_Model(object):
                 train_acc += sum(pred_label == label.numpy())
                 train_loss += loss.item()
 
-            self.train_acc = train_acc / loader.sampler.num_samples
-            self.train_loss = train_loss / loader.sampler.num_samples
-            self.performance_history['train_acc'].append(self.train_acc)
-            self.performance_history['train_loss'].append(self.train_loss)
-
             # valiation test
             info_word = ""
             if val_loader is not None:
@@ -84,6 +74,12 @@ class HW3_Model(object):
                     self.val_acc, self.val_loss)
                 if epoch == 1:
                     self.best_model_epoch = 1
+
+            # training_info
+            self.train_acc = train_acc / loader.sampler.num_samples
+            self.train_loss = train_loss / loader.sampler.num_samples
+            self.performance_history['train_acc'].append(self.train_acc)
+            self.performance_history['train_loss'].append(self.train_loss)
 
             # print train performance
             if printPerformance:
@@ -144,9 +140,9 @@ class HW3_Model(object):
                 val_acc += sum(pred_label == label.numpy())
                 val_loss += loss.item()
 
+            # valiating_info
             self.val_acc = val_acc / loader.sampler.num_samples
             self.val_loss = val_loss / loader.sampler.num_samples
-
             self.performance_history['val_acc'].append(self.val_acc)
             self.performance_history['val_loss'].append(self.val_loss)
 
