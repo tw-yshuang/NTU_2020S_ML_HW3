@@ -169,9 +169,6 @@ class HW3_Model(object):
             optimizer = self.optimizer
             self.net = self.net.state_dict()
             self.optimizer = self.optimizer.state_dict()
-            # with open(path, 'wb') as target:
-            #     pickle.dump(self, target)
-            # self.net = net
             torch.save(self, path)
             self.net = net
             self.optimizer = optimizer
@@ -180,16 +177,21 @@ class HW3_Model(object):
             #     pickle.dump(self, path)
             torch.save(self, path)
 
-    def load_model(self, path):
+    def load_model(self, path, fullNet=False):
         model = torch.load(path)
+        self.saveDir = model.saveDir
+        self.performance_history = model.performance_history
         try:
             self.best_model_epoch = model.best_model_epoch
         except:
             pass
-        self.saveDir = model.saveDir
-        self.performance_history = model.performance_history
-        self.net.load_state_dict(model.net)
-        self.optimizer.load_state_dict(model.optimizer)
+
+        if fullNet is True:
+            self.net = model.net
+            self.optimizer = model.optimizer
+        else:
+            self.net.load_state_dict(model.net)
+            self.optimizer.load_state_dict(model.optimizer)
         self.net.eval()
 
     def get_performance_plt(self):

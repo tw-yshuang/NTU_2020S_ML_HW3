@@ -55,7 +55,7 @@ def pre_training(path, NUM_EPOCH):
     val_loader = DataLoader(val_set, BATCH_SIZE,
                             shuffle=True, num_workers=NUM_WORKERS)
 
-    model.load_model(path)
+    model.load_model(path, fullNet=(path.find('final_') != -1))
     try:
         model.training(train_loader, val_loader, NUM_EPOCH=NUM_EPOCH,
                        saveDir=model.saveDir, checkpoint=20, bestModelSave=True)
@@ -69,7 +69,7 @@ def test_predict(path):
     test_loader = DataLoader(test_set, BATCH_SIZE,
                              shuffle=False, num_workers=NUM_WORKERS)
 
-    model.load_model(path)
+    model.load_model(path, fullNet=(path.find('final_') != -1))
     prediction = model.testing(test_loader)
 
     with open("{}/predict.csv".format(model.saveDir), 'w') as f:
@@ -81,7 +81,7 @@ def test_predict(path):
 def setting():
     global img_inChannel, train, val, test
     img_inChannel = 3
-    train = read_pickle('Data/train_balance.pickle')
+    train = read_pickle('Data/train.pickle')
     val = read_pickle('Data/val.pickle')
     test = read_pickle('Data/test.pickle')
 
@@ -133,6 +133,8 @@ if __name__ == "__main__":
     setting()
 
     # training_analysis(250, valiadating=True)
-    pre_training('out/0825-1109/best_e027_0.0425.pickle', 173)
-    # best_training()
+    pre_training('out/0827-2235/e220_0.0305.pickle', 130)
     # test_predict('out/0820-1444/final_e200_0.0080.pickle')
+
+    # a = torch.load('out/0825-1750/best_e006_0.0570.pickle')
+    # print(a)
