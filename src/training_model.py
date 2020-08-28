@@ -179,7 +179,7 @@ class HW3_Model(object):
 
     def load_model(self, path, fullNet=False):
         model = torch.load(path)
-        self.saveDir = model.saveDir
+        self.saveDir = path[:path.rfind('/')]
         self.performance_history = model.performance_history
         try:
             self.best_model_epoch = model.best_model_epoch
