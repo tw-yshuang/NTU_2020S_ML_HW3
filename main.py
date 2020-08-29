@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 from torch.utils.data import DataLoader
 from src.data_process import ImgDataset, DataPreProcess
+from src.food_img_transform import train_transforms, test_transforms
 from src.net import Net_Classifier, Net_Classifier_cyc, Net_Classifier_mass
 from src.training_model import HW3_Model
 
@@ -93,37 +94,6 @@ def setting():
     device = get_device()
     # net is use ntutiem_cyc server
     net = Net_Classifier_cyc(img_inChannel).to(device)
-
-    global train_transforms_arg, train_transforms, test_transforms
-    # training use agumentation
-    train_transforms_arg = transforms.Compose([
-        transforms.RandomChoice([
-            transforms.ColorJitter(brightness=(2)),
-            transforms.ColorJitter(contrast=(0.5, 3)),
-            transforms.ColorJitter(saturation=(0.5, 5)),
-            transforms.ColorJitter(hue=(-0.20, 0.05))
-        ]),
-
-        transforms.ColorJitter(brightness=(0.75, 1.25), contrast=(
-            0.75, 1.25), saturation=(0.15, 1.15), hue=(-0.10, 0.1)),
-
-        # brightness=(2), contrast=(0.5, 3), saturation=(0.5, 5), hue=(-0.20, 0.05)
-        # degree of rotat e.g. 15=(-15, 15)
-        transforms.RandomRotation(45, expand=False),
-        # transforms.Resize((128, 128)),
-    ])
-    train_transforms = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
-        transforms.RandomApply([train_transforms_arg], p=0.95),
-        transforms.ToTensor(),  # data normalization
-    ])
-    # testing dosen't use agumentation
-    test_transforms = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.ToTensor(),  # data normalization
-    ])
 
     global BATCH_SIZE, NUM_WORKERS
     # upload to DataLoader
