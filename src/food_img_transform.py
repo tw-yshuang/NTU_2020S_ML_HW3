@@ -5,8 +5,10 @@ import numpy as np
 from torchvision import transforms
 try:
     from src.Model.find_file_name import get_filenames
+    from src.Model.Img_DIP import get_filter_img
 except ModuleNotFoundError:
     from Model.find_file_name import get_filenames
+    from Model.Img_DIP import get_filter_img
 
 train_transforms_arg = transforms.Compose([
     transforms.RandomChoice([
@@ -45,8 +47,10 @@ def cv2_transforms(img, size=128, isShow=False):
     half_size = size // 2
     crop_img = img[img_center-half_size: img_center +
                    half_size, img_center-half_size: img_center+half_size]
+    filter_img = random.choice([crop_img, get_filter_img(
+        crop_img, kernel=random.choice(['laplace', 'mean']))])
     output_img = random.choice(
-        [get_pepper_salt_noised(crop_img, 0.0025), crop_img])
+        [filter_img, get_pepper_salt_noised(filter_img, 0.0025)])
 
     if isShow:
         cv2.imshow('img', img)
