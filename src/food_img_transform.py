@@ -48,7 +48,7 @@ def cv2_transforms(img, size=128, isShow=False):
     output_img = random.choice(
         [get_pepper_salt_noised(crop_img, 0.0025), crop_img])
 
-    isShow:
+    if isShow:
         cv2.imshow('img', img)
         cv2.imshow('crop', crop_img)
         cv2.imshow('output', output_img)
