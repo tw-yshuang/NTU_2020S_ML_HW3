@@ -12,15 +12,16 @@ except ModuleNotFoundError:
 
 train_transforms_arg = transforms.Compose([
     transforms.RandomChoice([
-        transforms.ColorJitter(brightness=(2)),
-        transforms.ColorJitter(contrast=(0.5, 3)),
-        transforms.ColorJitter(saturation=(0.5, 5)),
-        transforms.ColorJitter(hue=(-0.20, 0.05))
+        transforms.ColorJitter(brightness=(0.25, 1.75)),
+        transforms.ColorJitter(contrast=(0.25, 1.75)),
+        transforms.ColorJitter(saturation=(0.25, 1.75)),
+        transforms.ColorJitter(hue=(0, 0.1))
     ]),
 
     transforms.ColorJitter(brightness=(0.75, 1.25), contrast=(
-        0.75, 1.25), saturation=(0.15, 1.15), hue=(-0.10, 0.1)),
+        0.75, 1.25), saturation=(0.75, 1.25), hue=(0, 0.05)),
 
+    # TODO: let cv2_transforms independand to the train_transforms_arg
     transforms.Pad(padding=(32, 32), padding_mode='symmetric'),
     transforms.RandomRotation(45, expand=False),
     transforms.Lambda(lambda x: cv2_transforms(x)),
@@ -47,10 +48,11 @@ def cv2_transforms(img, size=128, isShow=False):
     half_size = size // 2
     crop_img = img[img_center-half_size: img_center +
                    half_size, img_center-half_size: img_center+half_size]
-    filter_img = random.choice([crop_img, get_filter_img(
-        crop_img, kernel=random.choice(['laplace', 'mean']))])
-    output_img = random.choice(
-        [filter_img, get_pepper_salt_noised(filter_img, 0.0025)])
+    filter_img = random.choice(
+        [crop_img, get_filter_img(crop_img, kernel=random.choice(['laplace', 'mean']))])
+    # output_img = random.choice(
+    #     [filter_img, get_pepper_salt_noised(filter_img, 0.0025)])
+    output_img = filter_img
 
     if isShow:
         cv2.imshow('img', img)
