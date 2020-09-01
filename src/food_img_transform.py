@@ -11,6 +11,9 @@ except ModuleNotFoundError:
     from Model.Img_DIP import get_filter_img
 
 train_transforms_arg = transforms.Compose([
+    transforms.ColorJitter(brightness=(0.75, 1.25), contrast=(
+        0.75, 1.25), saturation=(0.75, 1.25), hue=(0, 0.05)),
+
     transforms.RandomChoice([
         transforms.ColorJitter(brightness=(0.25, 1.75)),
         transforms.ColorJitter(contrast=(0.25, 1.75)),
@@ -18,22 +21,22 @@ train_transforms_arg = transforms.Compose([
         transforms.ColorJitter(hue=(0, 0.1))
     ]),
 
-    transforms.ColorJitter(brightness=(0.75, 1.25), contrast=(
-        0.75, 1.25), saturation=(0.75, 1.25), hue=(0, 0.05)),
-
     # TODO: let cv2_transforms independand to the train_transforms_arg
-    transforms.Pad(padding=(32, 32), padding_mode='symmetric'),
-    transforms.RandomRotation(45, expand=False),
-    transforms.Lambda(lambda x: cv2_transforms(x)),
-    transforms.ToPILImage(),
 ])
 
 train_transforms = transforms.Compose([
     transforms.ToPILImage(),
     transforms.RandomHorizontalFlip(),
     transforms.RandomVerticalFlip(),
-    transforms.RandomApply([train_transforms_arg], p=0.95),
+    transforms.Pad(padding=(64, 64), padding_mode='symmetric'),
+    transforms.RandomRotation(45, expand=True),
+    transforms.Lambda(lambda x: cv2_transforms(x)),
+    transforms.ToPILImage(),
+    transforms.Resize((128, 128)),
+    transforms.RandomApply([train_transforms_arg], p=0.85),
     transforms.ToTensor(),  # data normalization
+    transforms.RandomErasing(value='random'),
+    transforms.ToPILImage(),
 ])
 # testing dosen't use agumentation
 test_transforms = transforms.Compose([
@@ -42,17 +45,16 @@ test_transforms = transforms.Compose([
 ])
 
 
-def cv2_transforms(img, size=128, isShow=False):
+def cv2_transforms(img, inSize=256, isShow=False):
     img = np.asarray(img)
     img_center = img.shape[0] // 2
-    half_size = size // 2
+    half_size = inSize // 2
     crop_img = img[img_center-half_size: img_center +
                    half_size, img_center-half_size: img_center+half_size]
     filter_img = random.choice(
         [crop_img, get_filter_img(crop_img, kernel=random.choice(['laplace', 'mean']))])
-    # output_img = random.choice(
-    #     [filter_img, get_pepper_salt_noised(filter_img, 0.0025)])
-    output_img = filter_img
+    output_img = random.choice(
+        [filter_img, get_pepper_salt_noised(filter_img, amount=random.uniform(0.005, 0))])
 
     if isShow:
         cv2.imshow('img', img)
@@ -83,9 +85,10 @@ if __name__ == "__main__":
     for filename in filenames:
         img = cv2.imread(filename)
         # img = get_pepper_salt_noised(img, 0.05, True)
-        img = cv2.resize(img, (128, 128))
+        img = cv2.resize(img, (256, 256))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         process_img = train_transforms(img)
+        # process_img = transforms.ToPILImage(process_img)
 
         # process_img = cv2.imread(process_img)
         # cv2.imshow('raw', img)

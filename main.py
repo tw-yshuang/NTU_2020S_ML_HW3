@@ -98,7 +98,7 @@ def setting():
     global BATCH_SIZE, NUM_WORKERS
     # upload to DataLoader
     BATCH_SIZE = 32  # 　<<<<<　Batch size >>>>>
-    NUM_WORKERS = 4  # depand on transforms step
+    NUM_WORKERS = 5  # depand on transforms step
 
     global model
     # training
@@ -111,9 +111,9 @@ def setting():
 if __name__ == "__main__":
     setting()
 
-    training_analysis(250, valiadating=True)
+    training_analysis(150, valiadating=True)
     # pre_training('out/0828-1158/e100_0.0378.pickle', 250)
-    # test_predict('out/0820-1444/final_e200_0.0080.pickle')
+    # test_predict('out/0901-1308/e140_0.0258.pickle')
 
     # a = torch.load('out/0825-1750/best_e006_0.0570.pickle')
     # print(a)
