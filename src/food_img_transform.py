@@ -36,7 +36,6 @@ train_transforms = transforms.Compose([
     transforms.RandomApply([train_transforms_arg], p=0.85),
     transforms.ToTensor(),  # data normalization
     transforms.RandomErasing(value='random'),
-    transforms.ToPILImage(),
 ])
 # testing dosen't use agumentation
 test_transforms = transforms.Compose([
@@ -87,8 +86,11 @@ if __name__ == "__main__":
         # img = get_pepper_salt_noised(img, 0.05, True)
         img = cv2.resize(img, (256, 256))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        process_img = train_transforms(img)
-        # process_img = transforms.ToPILImage(process_img)
+
+        toPILimg_transforms = transforms.Compose([transforms.ToPILImage()])
+
+        process_tensor = train_transforms(img)
+        process_img = toPILimg_transforms(process_tensor)
 
         # process_img = cv2.imread(process_img)
         # cv2.imshow('raw', img)
