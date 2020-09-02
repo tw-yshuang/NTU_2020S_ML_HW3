@@ -6,7 +6,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 from src.data_process import ImgDataset, DataPreProcess
 from src.food_img_transform import train_transforms, test_transforms
-from src.net import Net_Classifier, Net_Classifier_cyc, Net_Classifier_mass
+from src.net import Net_Classifier, Net_Classifier_cyc, Net_Classifier_mass, Net_ShanRay
 from src.training_model import HW3_Model
 
 
@@ -93,7 +93,10 @@ def setting():
     global device, net
     device = get_device()
     # net is use ntutiem_cyc server
-    net = Net_Classifier_cyc(img_inChannel).to(device)
+
+    # TODO: Change net in here~~~
+    # net = Net_Classifier_cyc(img_inChannel).to(device)
+    net = Net_ShanRay().to(device)
 
     global BATCH_SIZE, NUM_WORKERS
     # upload to DataLoader
@@ -111,9 +114,9 @@ def setting():
 if __name__ == "__main__":
     setting()
 
-    training_analysis(150, valiadating=True)
-    # pre_training('out/0828-1158/e100_0.0378.pickle', 250)
-    # test_predict('out/0901-1308/e140_0.0258.pickle')
+    training_analysis(250, valiadating=True)
+    # pre_training('out/0901-1520/best_e061_0.0269.pickle', 189)
+    # test_predict('out/0901-1520/0901-1649/e180_0.0251.pickle')
 
     # a = torch.load('out/0825-1750/best_e006_0.0570.pickle')
     # print(a)
