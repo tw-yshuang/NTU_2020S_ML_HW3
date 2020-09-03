@@ -73,7 +73,8 @@ class HW3_Model(object):
                 info_word = " | Val acc: {:.7f}, loss: {:.7f}".format(
                     self.val_acc, self.val_loss)
                 if epoch == 1:
-                    self.best_model_epoch = 1
+                    self.best_loss_model_epoch = 1
+                    self.best_acc_model_epoch = 1
 
             # training_info
             self.train_acc = train_acc / loader.sampler.num_samples
@@ -92,7 +93,7 @@ class HW3_Model(object):
             if val_loader is not None:
                 if self.performance_history['val_loss'][self.best_loss_model_epoch-1] >= self.val_loss:
                     self.best_loss_model_epoch = epoch
-                if self.performance_history['val_acc'][self.best_acc_model_epoch-1] >= self.val_acc:
+                if self.performance_history['val_acc'][self.best_acc_model_epoch-1] <= self.val_acc:
                     self.best_acc_model_epoch = epoch
 
                 if bestModelSave is True:
