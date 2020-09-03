@@ -87,18 +87,34 @@ class HW3_Model(object):
                     epoch, NUM_EPOCH, time.time()-time_start,
                     self.train_acc, self.train_loss, info_word))
 
-            # only valiating is work, self.best_model_epoch and bestModelSave has meaning
-            if val_loader is not None and self.performance_history['val_loss'][self.best_model_epoch-1] >= self.val_loss:
+            # update epoch_record for best_loss and best_acc
+            # only valiating is work, self.best_loss_model_epoch, self.best_acc_model_epoch and bestModelSave has meaning
+            if val_loader is not None:
+                if self.performance_history['val_loss'][self.best_loss_model_epoch-1] >= self.val_loss:
+                    self.best_loss_model_epoch = epoch
+                if self.performance_history['val_acc'][self.best_acc_model_epoch-1] >= self.val_acc:
+                    self.best_acc_model_epoch = epoch
+
                 if bestModelSave is True:
-                    filenames = get_filenames(
-                        self.saveDir, 'best_e{:03d}*.pickle'.format(self.best_model_epoch))
-                    [os.remove(filename) for filename in filenames]
-                    self.best_model_epoch = epoch
-                    path = '{}/best_e{:03d}_{}.pickle'.format(
-                        self.saveDir, epoch, str(self.val_loss)[:6])
-                    self.save_model(path, onlyParameters=True)
-                else:
-                    self.best_model_epoch = epoch
+                    mark_word = ''
+                    mark_value = 0.
+
+                    def save_best_model(epoch, mark_word, mark_value):
+                        filenames = get_filenames(
+                            self.saveDir, 'best{}*.pickle'.format(mark_word))
+                        [os.remove(filename) for filename in filenames]
+                        path = '{}/best{}_e{:03d}_{}.pickle'.format(
+                            self.saveDir, mark_word, epoch, str(mark_value)[:6])
+                        self.save_model(path, onlyParameters=True)
+
+                    if self.best_loss_model_epoch == epoch:
+                        mark_word = '_loss'
+                        mark_value = self.val_loss
+                        save_best_model(epoch, mark_word, mark_value)
+                    if self.best_acc_model_epoch == epoch:
+                        mark_word = '_acc'
+                        mark_value = self.val_acc*100
+                        save_best_model(epoch, mark_word, mark_value)
 
             # checkpoint save model
             mark_word = ''
@@ -182,7 +198,8 @@ class HW3_Model(object):
         self.saveDir = path[:path.rfind('/')]
         self.performance_history = model.performance_history
         try:
-            self.best_model_epoch = model.best_model_epoch
+            self.best_loss_model_epoch = model.best_loss_model_epoch
+            self.best_acc_model_epoch = model.best_acc_model_epoch
         except:
             pass
 
