@@ -40,6 +40,7 @@ train_transforms = transforms.Compose([
 # testing dosen't use agumentation
 test_transforms = transforms.Compose([
     transforms.ToPILImage(),
+    transforms.Resize((128, 128)),
     transforms.ToTensor(),  # data normalization
 ])
 

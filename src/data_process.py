@@ -123,9 +123,9 @@ class ImgDataset(Dataset):
 
 if __name__ == "__main__":
     img_inChannel = 3
-    train = DataPreProcess('Data/food-11/training', 128,
-                           img_inChannel, dataBalance=True, savePath='Data/train_balance.pickle')
-    # val = DataPreProcess('Data/food-11/validation', 128,
-    #                      img_inChannel, savePath='Data/val.pickle')
+    # train = DataPreProcess('Data/food-11/training', 128,
+    #                        img_inChannel, dataBalance=True, savePath='Data/train_balance.pickle')
+    val = DataPreProcess('Data/food-11/validation', 256,
+                         img_inChannel, savePath='Data/val.pickle')
     # test = DataPreProcess('Data/food-11/testing', 128,
     #                       img_inChannel, isTest=True,  savePath='Data/test.pickle')
