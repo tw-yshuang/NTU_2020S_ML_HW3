@@ -22,7 +22,7 @@ def read_pickle(path):
         return pickle.load(target)
 
 
-def training_analysis(NUM_EPOCH, validating=True):
+def training_analysis(NUM_EPOCH, validating=True, saveDir='./out'):
     if validating:
         train_set = ImgDataset(
             train.x, train.y, train_transforms)  # 　<<<<<　train_transforms >>>>>
@@ -33,7 +33,7 @@ def training_analysis(NUM_EPOCH, validating=True):
                                 shuffle=True, num_workers=NUM_WORKERS)
         try:
             model.training(train_loader, val_loader, NUM_EPOCH=NUM_EPOCH,
-                           saveDir='./out', checkpoint=20, bestModelSave=True)
+                           saveDir=saveDir, checkpoint=20, bestModelSave=True)
             model.get_performance_plt()
         except KeyboardInterrupt:
             model.get_performance_plt()
@@ -43,12 +43,12 @@ def training_analysis(NUM_EPOCH, validating=True):
         train_loader = DataLoader(train_set, BATCH_SIZE,
                                   shuffle=True, num_workers=NUM_WORKERS)
         model.training(train_loader, NUM_EPOCH=NUM_EPOCH,
-                       saveDir='./out', checkpoint=20, bestModelSave=True)
+                       saveDir=saveDir, checkpoint=20, bestModelSave=True)
 
 
 def pre_training(path, NUM_EPOCH, validating=True):
     model.load_model(path, fullNet=(path.find('final_') != -1))
-    training_analysis(NUM_EPOCH, validating)
+    training_analysis(NUM_EPOCH, validating, saveDir=model.saveDir)
 
 
 def test_predict(path):
@@ -101,9 +101,9 @@ def setting():
 if __name__ == "__main__":
     setting()
 
-    training_analysis(240, validating=False)
-    # pre_training('out/0907-1011/best_acc_e105_77.376.pickle', 135)
-    # test_predict('out/0903-1331/0904-1328/best_loss_e187_0.0420.pickle')
+    # training_analysis(240, validating=False)
+    # pre_training('out/0907-1356/e140_0.0294.pickle', 120, validating=False)
+    test_predict('out/0907-1356/0907-1725/e220_0.0196.pickle')
 
     # a = torch.load('out/0825-1750/best_e006_0.0570.pickle')
     # print(a)

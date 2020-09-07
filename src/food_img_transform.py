@@ -20,8 +20,6 @@ train_transforms_arg = transforms.Compose([
         transforms.ColorJitter(saturation=(0.25, 1.75)),
         transforms.ColorJitter(hue=(0, 0.1))
     ]),
-
-    # TODO: let cv2_transforms independand to the train_transforms_arg
 ])
 
 train_transforms = transforms.Compose([
